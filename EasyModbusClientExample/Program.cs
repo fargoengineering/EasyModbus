@@ -32,45 +32,34 @@ namespace EasyModbusClientExample
 	/// </summary>
 	internal sealed class Program
 	{
-		/// <summary>
-		/// Program entry point.
-		/// </summary>
-		[STAThread]
-		private static void Main(string[] args)
+
+		public static void test_library()
 		{
-			// EasyMODBUS Example
-			//Application.EnableVisualStyles();
-			//Application.SetCompatibleTextRenderingDefault(false);
-			//Application.Run(new MainForm());
+            // Initialize modbus class
+            Graco proDispense = new Graco();
 
+            // Connect to IP / Port
+            Console.Write("Connected: ");
+            Console.WriteLine(proDispense.Connect("172.16.72.12", 502));
 
-			// FEI MODBUS CODE
+            // Set System state 2 = Standby On
+            proDispense.setSystemState(2);
 
-			// Initialize modbus class
-			Graco proDispense = new Graco();
+            // Confirm System State
+            Console.Write("System State set to: ");
+            Console.WriteLine(proDispense.getSystemState());
 
-			// Connect to IP / Port
-			Console.Write("Connected: ");
-			Console.WriteLine(proDispense.Connect("172.16.72.12", 502));
+            // Set Recipe
+            proDispense.setRecipe(50);
 
-			// Set System state 2 = Standby On
-			proDispense.setSystemState(2);
-
-			// Confirm System State
-			Console.Write("System State set to: ");
-			Console.WriteLine(proDispense.getSystemState());
-
-			// Set Recipe
-			proDispense.setRecipe(50);
-
-			// Confirm Recipe
+            // Confirm Recipe
             Console.Write("Current Recipe set to: ");
-			Console.WriteLine(proDispense.getRecipe());
+            Console.WriteLine(proDispense.getRecipe());
 
-			// Get Target fills for each port
-			int[] targets = proDispense.getDispenseTargets();
-			Console.Write("Fill Target on port 1 = ");
-			Console.WriteLine(targets[0]);
+            // Get Target fills for each port
+            int[] targets = proDispense.getDispenseTargets();
+            Console.Write("Fill Target on port 1 = ");
+            Console.WriteLine(targets[0]);
             Console.Write("Fill Target on port 2 = ");
             Console.WriteLine(targets[1]);
             Console.Write("Fill Target on port 3 = ");
@@ -78,21 +67,21 @@ namespace EasyModbusClientExample
             Console.Write("Fill Target on port 4 = ");
             Console.WriteLine(targets[3]);
 
-			// Get flow cc/min for each port
-			int[] fills = proDispense.getCurrentFlow();
+            // Get flow cc/min for each port
+            int[] fills = proDispense.getCurrentFlow();
             Console.Write("Current Fill Value on port 1 = ");
-			Console.WriteLine(fills[0]);
-			Console.Write("Current Fill value on port 2 = ");
-			Console.WriteLine(fills[1]);
+            Console.WriteLine(fills[0]);
+            Console.Write("Current Fill value on port 2 = ");
+            Console.WriteLine(fills[1]);
             Console.Write("Current Fill value on port 3 = ");
             Console.WriteLine(fills[2]);
             Console.Write("Current Fill value on port 4 = ");
             Console.WriteLine(fills[3]);
 
-			// Get Current state for each port
-			int[] states = proDispense.getPortState();
-			Console.Write("Current port 1 state: ");
-			Console.WriteLine(states[0]);
+            // Get Current state for each port
+            int[] states = proDispense.getPortState();
+            Console.Write("Current port 1 state: ");
+            Console.WriteLine(states[0]);
             Console.Write("Current port 2 state: ");
             Console.WriteLine(states[1]);
             Console.Write("Current port 3 state: ");
@@ -100,15 +89,31 @@ namespace EasyModbusClientExample
             Console.Write("Current port 4 state: ");
             Console.WriteLine(states[3]);
 
-			// Example: Start Fill and Monitor
-			// proDispense.setSystemState(3);	// Set state to DISPENSE
-			// proDispense.getCurrentFlow();	// Monitor Flow Rate
-			// proDispense.getCurrentVolume();	// Monitor Job Volume
+            // Example: Start Fill and Monitor
+            // proDispense.setSystemState(3);	// Set state to DISPENSE
+            // proDispense.getCurrentFlow();	// Monitor Flow Rate
+            // proDispense.getCurrentVolume();	// Monitor Job Volume
 
-			// Disconnect from MODBUS
+            // Disconnect from MODBUS
             proDispense.disconnect();
-
-		}
+        }
 		
+		/// <summary>
+		/// Program entry point.
+		/// </summary>
+		[STAThread]
+		private static void Main(string[] args)
+		{
+            // EasyMODBUS Example
+            //Application.EnableVisualStyles();
+            //Application.SetCompatibleTextRenderingDefault(false);
+            //Application.Run(new MainForm());
+
+            // FEI MODBUS CODE
+            //test_library();
+
+            Application.Run(new FEI_FORM());
+
+        }
 	}
 }

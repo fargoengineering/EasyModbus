@@ -80,6 +80,12 @@
     <Compile Include="..\EasyModbus\StoreLogData.cs">
       <Link>StoreLogData.cs</Link>
     </Compile>
+    <Compile Include="FEI_FORM.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FEI_FORM.Designer.cs">
+      <DependentUpon>FEI_FORM.cs</DependentUpon>
+    </Compile>
     <Compile Include="Graco.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
@@ -100,6 +106,9 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="FEI_FORM.resx">
+      <DependentUpon>FEI_FORM.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>

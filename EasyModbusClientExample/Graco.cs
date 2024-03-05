@@ -7,6 +7,36 @@ using System.Threading.Tasks;
 
 namespace EasyModbusClientExample
 {
+    public class Port
+    {
+        public string portName;
+        public int portNumber;
+        public int reg_read_state;
+        public int reg_read_current_value;
+        public int reg_read_target;
+        public int reg_read_tolerance;
+
+        public Port(string portName, int portNumber, int reg_read_state, int reg_read_current_value, int reg_read_target, int reg_read_tolerance)
+        {
+            this.portName = portName;
+            this.portNumber = portNumber;
+            this.reg_read_state = reg_read_state;
+            this.reg_read_current_value = reg_read_current_value;
+            this.reg_read_target = reg_read_target;
+            this.reg_read_tolerance = reg_read_tolerance;
+        }
+
+        public int getPortNumber() { return portNumber; }
+
+        public void setPortNumber(int num) { portNumber = num; }
+
+        public string getPortName() { return portName; }
+
+        public void setPortName(string name) { portName = name; }
+
+
+    }
+    
     public class Graco  // TODO: implements modbus interface
     {
         // Constant Registers
@@ -49,7 +79,7 @@ namespace EasyModbusClientExample
         public bool Connect(string hostname, int port)
         {
             modbusClient.IPAddress = hostname;
-            modbusClient.Port = 502;
+            modbusClient.Port = port;
             modbusClient.Connect();
 
             return modbusClient.Connected;
