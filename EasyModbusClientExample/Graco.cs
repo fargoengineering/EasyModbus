@@ -14,7 +14,7 @@ namespace EasyModbusClientExample
         const int reg_read_current_recipe = 102;
         const int reg_write_current_state = 402;
         const int reg_write_current_recipe = 400;
-        
+
         // Ports
         Port port1;
         Port port2;
@@ -28,9 +28,9 @@ namespace EasyModbusClientExample
         // Modbus Client
         private EasyModbus.ModbusClient modbusClient;
 
-        public Graco(string hostname)
+        public Graco()
         {
-        
+
             // All 8 ports and their registers for GRACO PRODISPENSE.
             // portName, PortNumber, stateReg, currentReg, targetReg, toleranceReg
             port1 = new Port("300PSI2", 1, 106, 154, 202, 218);
@@ -43,109 +43,131 @@ namespace EasyModbusClientExample
             port8 = new Port("Dye", 8, 120, 168, 216, 232);
 
             // Client
-            modbusClient = new EasyModbus.ModbusClient(); 
-            modbusClient.IPAddress = hostname;
+            modbusClient = new EasyModbus.ModbusClient();
         }
 
-        void writeRecipe(int recipe)
+        public bool Connect(string hostname, int port)
+        {
+            modbusClient.IPAddress = hostname;
+            modbusClient.Port = 502;
+            modbusClient.Connect();
+
+            return modbusClient.Connected;
+        }
+
+        public void disconnect()
+        {
+            modbusClient.Disconnect();
+        }
+
+        public void setRecipe(int recipe)
         {
             // sets states and writes given recipe index to the fill machine
             modbusClient.WriteSingleRegister(reg_write_current_recipe, recipe);
         }
 
-        int readRecipe()
+        public int getRecipe()
         {
             // returns current selected recipe
             int[] recipe_current = modbusClient.ReadHoldingRegisters(reg_read_current_recipe, 1);
             return recipe_current[0];
         }
 
-        void setSystemState(int state)
+        public void setSystemState(int state)
         {
             modbusClient.WriteSingleRegister(reg_write_current_state, state);
         }
 
-        int getSystemState()
+        public int getSystemState()
         {
-            int[] state = modbusClient.ReadHoldingRegisters(reg_read_current_state,1);
+            int[] state = modbusClient.ReadHoldingRegisters(reg_read_current_state, 1);
             return state[0];
         }
 
-        int[] getPortState()
+        public int[] getPortState()
         {
             // Standby/Initialization of each panel
-            int[] portStates = modbusClient.ReadHoldingRegisters(106, 8);
-            return portStates;
+            int[] portStates = modbusClient.ReadHoldingRegisters(106, 16);
+            int[] portStates_valid = removeOddRegisters(portStates);
+            return portStates_valid;
         }
 
-        int[] getPortStatus()
+        public int[] getPortStatus()
         {
             // Flow/Valve/Dispense/Job status
-            int[] portStatus = modbusClient.ReadHoldingRegisters(122,8);
-            return portStatus;
+            int[] portStatus = modbusClient.ReadHoldingRegisters(122, 16);
+            int[] portStatus_valid = removeOddRegisters(portStatus);
+            return portStatus_valid;
         }
 
-        int[] getPortEvent()
+        public int[] getPortEvent()
         {
             // Represents Error states for ports
-            int[] portEvents = modbusClient.ReadHoldingRegisters(138, 8);
-            return portEvents;
+            int[] portEvents = modbusClient.ReadHoldingRegisters(138, 16);
+            int[] portEvents_valid = removeOddRegisters(portEvents);
+            return portEvents_valid;
         }
 
-        int[] getCurrentVolume()
+        public int[] getCurrentVolume()
         {
             // Report current fill value for each port 
             // ex: 1250 = 12.50 cc
-            int[] currentVolumes = modbusClient.ReadHoldingRegisters(154, 8);
-            return currentVolumes;
+            int[] currentVolumes = modbusClient.ReadHoldingRegisters(154, 16);
+            int[] currentVolumes_valid = removeOddRegisters(currentVolumes);
+            return currentVolumes_valid;
         }
 
-        int[] getPreviousVolume()
+        public int[] getPreviousVolume()
         {
             // Report fill volume for last fill job
-            int[] previousVolumes = modbusClient.ReadHoldingRegisters(170, 8);
-            return previousVolumes;
+            int[] previousVolumes = modbusClient.ReadHoldingRegisters(170, 16);
+            int[] previousVolumes_valid = removeOddRegisters(previousVolumes);
+            return previousVolumes_valid;
         }
 
-        int[] getCurrentFlow()
+        public int[] getCurrentFlow()
         {
             // Flow in cc/min
             // Value has fixed-point value with the lower 10 digits being the val to the right of decimal.
             // To obtain int value, ignore the lowest 10 digits.
-            int[] currentFlows = modbusClient.ReadHoldingRegisters(186, 8);
-            return currentFlows;
+            int[] currentFlows = modbusClient.ReadHoldingRegisters(186, 16);
+            int[] currentFlows_valid = removeOddRegisters(currentFlows);
+            return currentFlows_valid;
         }
 
-        int[] getDispenseTargets()
+        public int[] getDispenseTargets()
         {
             // cc for each panel
             // ex: 1250 = 12.50 cc
-            int[] dispenseTargets = modbusClient.ReadHoldingRegisters(202, 8);
-            return dispenseTargets;
+            int[] dispenseTargets = modbusClient.ReadHoldingRegisters(202, 16);
+            int[] dispenseTargets_valid = removeOddRegisters(dispenseTargets);
+            return dispenseTargets_valid;
         }
 
-        int[] getDispenseTolerance()
+        public int[] getDispenseTolerance()
         {
             // value in percentage
             // ex: 12 = 12%
-            int[] dispenseTolerances = modbusClient.ReadHoldingRegisters(218, 8);
-            return dispenseTolerances;
+            int[] dispenseTolerances = modbusClient.ReadHoldingRegisters(218, 16);
+            int[] dispenseTolerances_valid = removeOddRegisters(dispenseTolerances);
+            return dispenseTolerances_valid;
         }
 
-        int[] getGrandTotalVolume()
+        public int[] getGrandTotalVolume()
         {
             // val in cc
-            int[] grandTotals = modbusClient.ReadHoldingRegisters(234, 8);
-            return grandTotals;
+            int[] grandTotals = modbusClient.ReadHoldingRegisters(234, 16);
+            int[] grandTotals_valid = removeOddRegisters(grandTotals);
+            return grandTotals_valid;
         }
 
-        void setPanelEnable(int port, int enable)
+        public void setPanelEnable(int port, int enable)
         {
             // 0 = not enabled, 1 = enabled
-            switch(port)
+            switch (port)
             {
                 case 1:
-                    modbusClient.WriteSingleRegister(410,enable);
+                    modbusClient.WriteSingleRegister(410, enable);
                     break;
                 case 2:
                     modbusClient.WriteSingleRegister(412, enable);
@@ -171,11 +193,11 @@ namespace EasyModbusClientExample
                 default:
                     Console.WriteLine("Port Index Not Valid!");
                     break;
-                 
+
             }
         }
 
-        void setPanelUnits(int port, int unit)
+        public void setPanelUnits(int port, int unit)
         {
             // 0 = cc
             // 1 = Liters
@@ -211,6 +233,21 @@ namespace EasyModbusClientExample
                     Console.WriteLine("Port Index Not Valid");
                     break;
             }
+        }
+
+        private int[] removeOddRegisters(int[] reg)
+        {
+            // The proDispense Graco only uses even numbered registers.
+            // This function will remove invalid data from unused registers.
+            
+            int newSize = reg.Length / 2 + reg.Length % 2;
+            int[] newArray = new int[newSize];
+
+            for  (int i = 0,j = 0; i<reg.Length; i += 2, j++)
+            {
+                newArray[j] = reg[i];
+            }
+            return newArray;
         }
     }
 }
