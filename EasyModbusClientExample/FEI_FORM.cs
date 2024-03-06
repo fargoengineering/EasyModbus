@@ -16,13 +16,15 @@ namespace EasyModbusClientExample
         public Graco fluid_fill;
         string boxText;
         bool filling = false;
-
+        int numPorts = 8;
         public FEI_FORM()
         {
             InitializeComponent();
             textBox1.Text = "172.16.72.12";
             textBox2.Text = "502";
             textBox4.Text = "8";
+            label5.Text = "Uninitialized";
+            label6.Text = "Recipe: ";
         }
 
 
@@ -32,16 +34,16 @@ namespace EasyModbusClientExample
             richTextBox1.Clear();
         }
 
-        private void updateText(int numPorts)
+        private void updateText()
         {
             while (true)
             {
                 int[] currentFills = fluid_fill.getCurrentVolume();
                 int[] targets = fluid_fill.getDispenseTargets();
-
+                int systemState = fluid_fill.getSystemState();
                 int recipe = fluid_fill.getRecipe();
 
-                string text = $"Port\tCurrent Fill\tTarget\t\tCurrent Recipe: {recipe}\n-------------------------------------------------------------------------------------------------------------\n\n";
+                string text = $"Port\tCurrent Fill\tTarget\t\n-------------------------------------------------------------------------------------------------------------\n\n";
 
                 for (int i = 1; i <= numPorts; i++)
                 {
@@ -49,9 +51,27 @@ namespace EasyModbusClientExample
                 }
 
                 //richTextBox1.Text = text;
+                string stateStr = "";
+
+                if (systemState == 1)
+                {
+                    stateStr = "Standby Off";
+                }else if (systemState == 2)
+                {
+                    stateStr = "Standby On";
+                }else if (systemState == 3)
+                {
+                    stateStr = "Dispensing";
+                }
+                else
+                {
+                    stateStr = "Uninitialized";
+                }
 
                 this.Invoke(new MethodInvoker(delegate ()
                 {
+                    label5.Text = stateStr;
+                    label6.Text = "Recipe: " + recipe;
                     richTextBox1.Text = text;
                 }));
                 Console.WriteLine("Thread spin");
@@ -71,20 +91,20 @@ namespace EasyModbusClientExample
             string hostname = textBox1.Text;
             int port = int.Parse(textBox2.Text);
             int recipe = int.Parse(textBox3.Text);
-            int numPorts = int.Parse(textBox4.Text);
+            numPorts = int.Parse(textBox4.Text);
 
             fluid_fill = new Graco();
 
             bool connected = fluid_fill.Connect(hostname, port);
             Console.Write(connected);
             fluid_fill.setSystemState(2);
-            fluid_fill.setRecipe(recipe);
-
+            bool set = fluid_fill.setRecipe(recipe);
+            Console.WriteLine(set);
 
             // update text box thread
             Task.Run(() =>
             {
-                updateText(numPorts);
+                updateText();
             });
 
 

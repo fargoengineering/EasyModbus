@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -90,11 +91,29 @@ namespace EasyModbusClientExample
             modbusClient.Disconnect();
         }
 
-        public void setRecipe(int recipe)
+        public bool setRecipe(int recipe)
         {
             // sets states and writes given recipe index to the fill machine
             modbusClient.WriteSingleRegister(reg_write_current_recipe, recipe);
+
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
+            while (true)
+            {
+                if(getRecipe() == recipe)
+                {
+                    return true;
+                }
+
+                if (stopwatch.ElapsedMilliseconds > 2000)
+                {
+                    return false;
+                }
+            }
         }
+
+
+        
 
         public int getRecipe()
         {
